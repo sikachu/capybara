@@ -76,6 +76,8 @@ class Capybara::Driver::RackTest < Capybara::Driver::Base
       if tag_name == 'a'
         method = self["data-method"] || :get
         driver.process(method, self[:href].to_s)
+      elsif tag_name == 'input' and type == 'button' and node['onclick'] =~ /window.location(?:\.href)? ?= ?'(.+)'/
+        driver.process(:get, $1)
       elsif (tag_name == 'input' or tag_name == 'button') and %w(submit image).include?(type)
         Form.new(driver, form).submit(self)
       end
