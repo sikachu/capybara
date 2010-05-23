@@ -18,7 +18,7 @@ module Capybara
     end
 
     def value
-      self[:value]
+      self.tag_name =~ /textarea/i ? text : self[:value]
     end
 
     def set(value)
