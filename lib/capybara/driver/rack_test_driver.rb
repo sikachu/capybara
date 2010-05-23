@@ -180,6 +180,7 @@ class Capybara::Driver::RackTest < Capybara::Driver::Base
 
   include ::Rack::Test::Methods
   attr_reader :app
+  attr_accessor :current_host
 
   alias_method :response, :last_response
   alias_method :request, :last_request
@@ -194,7 +195,7 @@ class Capybara::Driver::RackTest < Capybara::Driver::Base
 
   def process(method, path, attributes = {})
     return if path.gsub(/^#{current_path}/, '') =~ /^#/
-    send(method, path, attributes, env)
+    send(method, generate_url(path), attributes, env)
     follow_redirects!
   end
 
@@ -208,7 +209,7 @@ class Capybara::Driver::RackTest < Capybara::Driver::Base
 
   def submit(method, path, attributes)
     path = current_path if not path or path.empty?
-    send(method, path, attributes, env)
+    send(method, generate_url(path), attributes, env)
     follow_redirects!
   end
 
@@ -243,6 +244,12 @@ private
 
   def current_path
     request.path rescue ""
+  end
+
+  def generate_url(path)
+    path = URI.parse path
+    path = URI.parse(current_host) + path if current_host
+    path.to_s
   end
 
   def follow_redirects!
